@@ -1,9 +1,8 @@
-# PROTAX-GPU
-Code and experiments for PROTAX-GPU.
-A GPU-accelerated JAX-based implementation of [PROTAX](https://pubmed.ncbi.nlm.nih.gov/27296980/) 
+# PROTAX-py
+Python implementation of [PROTAX](https://pubmed.ncbi.nlm.nih.gov/27296980/) 
 
 # Functionality
-Estimates the probability of each outcome in a taxonomic tree given a query barcode sequence compared to reference sequences.
+Estimates the probability of each outcome in a taxonomic tree given a query sequence compared to reference sequences.
 
 Requirements:
 - Python >=3.9
