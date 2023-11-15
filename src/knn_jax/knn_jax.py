@@ -5,7 +5,7 @@
 
 __all__ = ["knn, knn_v2"]
 
-from knn_jax import gpu_ops                    # refers to knn_jax installed in site-packages
+from . import gpu_ops                    # refers to knn_jax installed in site-packages
 from jax.lib import xla_client
 from jax import core
 from jax.core import ShapedArray

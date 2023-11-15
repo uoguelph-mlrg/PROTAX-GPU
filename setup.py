@@ -78,26 +78,30 @@ class CMakeBuildExt(build_ext):
 
 extensions = [
     Extension(
-        name="protax.knn_jax.gpu_ops",
+        name="knn_jax.gpu_ops",
         sources=['lib/knn_ops.cpp', 'lib/knn_kernels.cu'],
         include_dirs=[pb11_dir],
     ),
 ]
+
+pdirs = {
+    "src/protax": "protax",
+}
 
 
 # https://setuptools.pypa.io/en/latest/references/keywords.html#keywords
 setup(
     name="protax",                                  # name of package
     author="Roy Li",
-    # author_email="email here",
-    # url="github link",
+    author_email="roymy.li12@gmail.com",
+    url="github.com/uoguelph-mlrg/protax-gpu",
     # license="MIT",
     description=(
-        "GPU kernels for sparse KNN with JAX"
+        "GPU accelerated DNA barcoding"
     ),
     long_description_content_type="text/markdown",
-    packages=find_packages("protax"),                    # packages to include in final knn_jax package
-    package_dir={"": "protax"},                          # root directory for included python packages
+    packages=find_packages(),                    # packages to include in final knn_jax package
+    package_dir=pdirs,                          # root directory for included python packages
     include_package_data=True,
     install_requires=["jax", "jaxlib"],
     extras_require={"test": "pytest"},

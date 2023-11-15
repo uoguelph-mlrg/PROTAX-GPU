@@ -4,7 +4,7 @@ from jax.experimental import sparse
 from functools import partial
 import numpy as np
 from functools import partial
-from protax.knn_jax import knn, knn_v2
+from knn_jax import knn, knn_v2
 
 # @jax.jit
 def seq_dist(q, seqs, ok, ok_query):

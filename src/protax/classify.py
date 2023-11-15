@@ -143,5 +143,5 @@ if __name__ == "__main__":
 
     # testing for now
     query_dir = r"/home/roy/Documents/PROTAX-dsets/30k_small/refs.aln"
-    classify_file(query_dir, "models/params/m2.npz", "models/ref_db/taxonomy.npz") 
-    compute_perplexity(query_dir, "models/params/m2.npz", "models/ref_db/taxonomy.npz")
+    classify_file(query_dir, "models/params/model.npz", "models/ref_db/taxonomy37k.npz") 
+    compute_perplexity(query_dir, "models/params/model.npz", "models/ref_db/taxonomy37k.npz")
