@@ -5,7 +5,7 @@ import jax
 import numpy as np
 import jax.numpy as jnp
 from jax.experimental import sparse
-from taxonomy import CSRWrapper, TaxTree, ProtaxModel
+from .taxonomy import CSRWrapper, TaxTree, ProtaxModel
 from scipy.sparse import csr_matrix
 
 from functools import reduce

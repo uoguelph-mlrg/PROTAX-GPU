@@ -1,5 +1,5 @@
-from protax_utils import read_model_jax, read_query, read_baseline
-import model
+from .protax_utils import read_model_jax, read_query, read_baseline
+from .model import get_probs
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -66,7 +66,7 @@ def classify_file(qdir, par_dir, tax_dir, verbose=False):
             break  # EOF
             
         start = time.time()
-        probs = model.get_probs(q, ok, tree, params, segnum, N).block_until_ready()
+        probs = get_probs(q, ok, tree, params, segnum, N).block_until_ready()
         end = time.time()
 
         probs = jnp.take(probs, tree.paths, fill_value=-1)

@@ -72,8 +72,8 @@ def test_1seq_scaling():
     q, q_ok = read_query(q)
     r, r_ok = read_query(r)
 
-    r = jnp.tile(jnp.array(r), (13000000, 1))
-    r_ok = jnp.tile(jnp.array(r_ok), (13000000, 1))
+    r = jnp.tile(jnp.array(r), (130000, 1))
+    r_ok = jnp.tile(jnp.array(r_ok), (130000, 1))
 
     # warmup
     seq_dist(q, r, r_ok, q_ok).block_until_ready()

@@ -14,7 +14,7 @@ def test_z_and_bprob():
     """
     Test the correctness on the 30k small set over entire design matrix
     """
-    tree, params, N, segnum = protax_utils.read_model_jax("models/params/model.npz", "models/ref_db/taxonomy.npz")
+    tree, params, N, segnum = protax_utils.read_model_jax("models/params/model.npz", "models/ref_db/taxonomy37k.npz")
     f = open(debug_f)
 
     name = f.readline().strip('\n').split('\t')[0]
