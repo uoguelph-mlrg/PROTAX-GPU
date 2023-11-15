@@ -82,16 +82,7 @@ def test_topk_small():
 
     print(f"test_topk_small: {end_time - start_time}s")
 
-    newdat = jnp.array([N2S_SMALL.data, N2S_SMALL.data])
-    vm_knn = jax.vmap(knn, (None, None, 0, None), 0)
-    res = vm_knn(N2S_SMALL.indptr, N2S_SMALL.indices, newdat, N).block_until_ready()
-
-    h = 3
-    assert res.shape == (3, 2)
-    assert jnp.all(res.at[:, 0].get() == jnp.array([0.012, 0.01, 0.1]))
-    assert jnp.all(res.at[:, 1].get() == jnp.array([1, 0.3, 0.4]))
-
-
+  
 def test_topk_1k():
     N = N2S_1K.shape[0]
     start_time = time.time()

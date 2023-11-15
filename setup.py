@@ -85,7 +85,8 @@ extensions = [
 ]
 
 pdirs = {
-    "src/protax": "protax",
+    "protax": "src/protax",
+    "knn_jax": "src/knn_jax"
 }
 
 
@@ -100,7 +101,7 @@ setup(
         "GPU accelerated DNA barcoding"
     ),
     long_description_content_type="text/markdown",
-    packages=find_packages(),                    # packages to include in final knn_jax package
+    packages=["protax", "knn_jax"],                    # packages to include in final knn_jax package
     package_dir=pdirs,                          # root directory for included python packages
     include_package_data=True,
     install_requires=["jax", "jaxlib"],
