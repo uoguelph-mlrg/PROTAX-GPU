@@ -10,8 +10,17 @@ find_package(pybind11 CONFIG REQUIRED)
 include_directories(${CMAKE_CURRENT_LIST_DIR}/lib)
 include_directories(${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
 
+# cpu op library
+pybind11_add_module(
+  cpu_ops
+  ${CMAKE_CURRENT_LIST_DIR}/lib/knn_cpu.cpp
+)
+install(TARGETS cpu_ops DESTINATION knn_jax)
+
+# gpu op library
 pybind11_add_module(
   gpu_ops
   ${CMAKE_CURRENT_LIST_DIR}/lib/knn_kernels.cu
-  ${CMAKE_CURRENT_LIST_DIR}/lib/knn_ops.cpp)
+  ${CMAKE_CURRENT_LIST_DIR}/lib/knn_dispatch.cpp
+)
 install(TARGETS gpu_ops DESTINATION knn_jax)

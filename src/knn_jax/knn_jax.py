@@ -5,7 +5,7 @@
 
 __all__ = ["knn, knn_v2"]
 
-from . import gpu_ops                    # refers to knn_jax installed in site-packages
+from . import gpu_ops, cpu_ops                        # refers to knn_jax installed in site-packages
 from jax.lib import xla_client
 from jax import core
 from jax.core import ShapedArray
@@ -165,6 +165,10 @@ def _knn_v2_lowering(ctx, indptr, indices, matdat, res):
 #             Registering KNN Primitive
 # =======================================================
 
+# register CPU XLA custom calls
+for _name, _value in cpu_ops.registrations().items():
+    xla_client.register_custom_call_target(_name, _value, platform="cpu")
+
 # register GPU XLA custom calls
 for _name, _value in gpu_ops.registrations().items():
     xla_client.register_custom_call_target(_name, _value, platform="gpu")
@@ -197,5 +201,3 @@ if __name__ == "__main__":
 
     foo = sparse.bcsr_fromdense(foo)
     x = knn(foo.indptr, foo.indices, foo.data, 3)
-
-    h = 3

@@ -76,10 +76,16 @@ class CMakeBuildExt(build_ext):
             cwd=self.build_temp,
         )
 
+# TODO: check if gpu support is available
+
 extensions = [
     Extension(
+        name="knn_jax.cpu_ops",
+        sources=["lib/knn_cpu.cpp"]
+    ),
+    Extension(
         name="knn_jax.gpu_ops",
-        sources=['lib/knn_ops.cpp', 'lib/knn_kernels.cu'],
+        sources=['lib/knn_dispatch.cpp', 'lib/knn_kernels.cu'],
         include_dirs=[pb11_dir],
     ),
 ]
