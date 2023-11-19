@@ -6,7 +6,7 @@
 
 #define THREADS_PER_BLOCK 128
 
-namespace gpu_ops{
+namespace knn{
 
 __global__ void reduce_min_k(const float* data, int start, int end, int row, float* result){
     if (end-start <= 0){
@@ -132,4 +132,4 @@ void gpu_knn_v2_f32(cudaStream_t stream, void** buffers, const char* opaque,
     dispatch_min_k_v2<float>(stream, buffers, opaque, opaque_len);
 }
 
-} // namespace gpu_ops
+} // namespace knn 

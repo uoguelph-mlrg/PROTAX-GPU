@@ -6,7 +6,7 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace gpu_ops {
+namespace knn {
 
 struct KNNDescriptor {
   int rows;   // number of rows in sparse array
@@ -21,5 +21,5 @@ void gpu_knn_f32(cudaStream_t stream, void** buffers, const char* opaque,
 void gpu_knn_v2_f32(cudaStream_t stream, void** buffers, const char* opaque,
                     std::size_t opaque_len);
 
-}  // namespace gpu_ops
+}  // namespace knn 
 #endif

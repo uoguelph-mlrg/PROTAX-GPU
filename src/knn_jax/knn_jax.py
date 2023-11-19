@@ -5,7 +5,7 @@
 
 __all__ = ["knn, knn_v2"]
 
-from . import gpu_ops                    # refers to knn_jax installed in site-packages
+from . import gpu_ops, cpu_ops                        # refers to knn_jax installed in site-packages
 from jax.lib import xla_client
 from jax import core
 from jax.core import ShapedArray
@@ -63,7 +63,7 @@ def _knn_abstract_eval(indptr, indices, matdat, res):
     return ShapedArray(res.shape, matdat.dtype)
 
 
-def _knn_lowering(ctx, indptr, indices, matdat, res):
+def _knn_lowering(ctx, indptr, indices, matdat, res, platform="cpu"):
     """
     MLIR lowering for knn primitive where k=2.
     i.e. lowering primitive to MLIR custom call (knn kernel dispatch)
@@ -86,23 +86,37 @@ def _knn_lowering(ctx, indptr, indices, matdat, res):
 
     if gpu_ops is None:
         raise ValueError("gpu_ops not compiled")
-    
-    # create opaque descriptor for problem size
-    opaque = gpu_ops.build_knn_descriptor(N)
 
+    if platform == "gpu":
+        # create opaque descriptor for problem size
+        opaque = gpu_ops.build_knn_descriptor(N)
+        out = custom_call(
+            b"gpu_knn_f32",                                   # call target name
+            out_types=[res_type],
+            operands=[indptr, indices, matdat], 
+            operand_layouts=default_layouts(ip_type.shape,
+                                            idx_type.shape, 
+                                            md_type.shape),
+            result_layouts=default_layouts(res_type.shape),   # memory layout
+            backend_config=opaque,                            # opaque descriptor
+        )
+        # output must be iterable
+        return [out]
+
+    # cpu custom call (default to k=2 for now)
+    layout = default_layouts(ip_type.shape, idx_type.shape, md_type.shape)
+    layout.insert(0, ())
     out = custom_call(
-        b"gpu_knn_f32",                                   # call target name
+        b"cpu_knn_f32",                                       # call target name
         out_types=[res_type],
-        operands=[indptr, indices, matdat], 
-        operand_layouts=default_layouts(ip_type.shape,
-                                         idx_type.shape, 
-                                         md_type.shape),
-        result_layouts=default_layouts(res_type.shape),   # memory layout
-        backend_config=opaque,                            # opaque descriptor
+        operands=[mlir.ir_constant(N), indptr, indices, matdat], 
+        operand_layouts=layout, 
+        result_layouts=default_layouts(res_type.shape),       # memory layout
     )
 
-    # output must be iterable
     return [out]
+
+
 
 
 # =======================================================
@@ -165,6 +179,10 @@ def _knn_v2_lowering(ctx, indptr, indices, matdat, res):
 #             Registering KNN Primitive
 # =======================================================
 
+# register CPU XLA custom calls
+for _name, _value in cpu_ops.registrations().items():
+    xla_client.register_custom_call_target(_name, _value, platform="cpu")
+
 # register GPU XLA custom calls
 for _name, _value in gpu_ops.registrations().items():
     xla_client.register_custom_call_target(_name, _value, platform="gpu")
@@ -176,7 +194,14 @@ _knn_prim.def_impl(partial(xla.apply_primitive, _knn_prim))
 _knn_prim.def_abstract_eval(_knn_abstract_eval)
 
 # connect XLA translation rules for JIT compilation
-mlir.register_lowering(_knn_prim, _knn_lowering, platform="gpu")
+mlir.register_lowering(_knn_prim, 
+                        partial(_knn_lowering, platform="gpu"),
+                        platform="gpu"
+)
+mlir.register_lowering(_knn_prim, 
+                        partial(_knn_lowering, platform="cpu"),
+                        platform="cpu"
+)
 
 
 # defining KNN v2 primitive
@@ -197,5 +222,3 @@ if __name__ == "__main__":
 
     foo = sparse.bcsr_fromdense(foo)
     x = knn(foo.indptr, foo.indices, foo.data, 3)
-
-    h = 3
