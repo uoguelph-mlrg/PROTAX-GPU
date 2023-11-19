@@ -22,9 +22,59 @@ Built & Tested on:
 
 
 # Installation:
-1. Navigate to the root folder
-2. run `pip install .` to build custom CUDA kernels and create python bindings with CMake
-3. test the functionality of `knn-utils` by running `tests/test_topk.py`
 
-Everything is now ready for model inference. Classification function in `classify.py`
-should work now
+**1. Create & activate new environment (recommended)**
+
+Conda:
+```
+conda create -n [name] python=3.10
+conda activate [name]
+```
+**2. Install dependencies**
+
+Cmake:
+```
+conda install -c conda-forge cmake
+```
+
+CUDA 12 + cuDNN:
+```
+conda install -c nvidia cudatoolkit=12.2 cudnn=8.9
+```
+
+**3. Install JAX and jaxlib**
+
+| **System** | **Type** | **Command** |
+| --- | --- | --- |
+| **Linux** | CPU | `pip install "jax[cpu]"`|
+| **Linux** | GPU | `pip install "jax[cuda122]"`
+| **MacOS** | CPU | `pip install "jax[cpu]" "jaxlib[cpu]"`|
+| **MacOS** | GPU | **TODO**|
+
+**TODO**: Windows support, check macOS GPU support
+
+**4. Install PROTAX-GPU**
+
+Clone this repository.
+```
+git clone https://github.com/uoguelph-mlrg/PROTAX-GPU.git
+```
+
+Install `requirements.txt`
+```
+pip install -r requirements.txt
+```
+
+Finally, install PROTAX-GPU. This will install a package called `protax` in your environment.
+```
+pip install .
+```
+
+# Usage
+Instructions for running PROTAX-GPU for inference and training.
+
+## Inference
+**TODO**
+
+## Training
+**TODO**
