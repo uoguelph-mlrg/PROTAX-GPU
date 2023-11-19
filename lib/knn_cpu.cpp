@@ -46,10 +46,9 @@ void cpu_min_k_row(const int N, const int row, const int* indptr, const int* ind
 template <typename T>
 void cpu_knn_f32(void *out, const void **in){
     const int N = *static_cast<const int*>(in[0]);
-    const int K = *static_cast<const int*>(in[1]);
-    const int* indptr = static_cast<const int*>(in[2]);
-    const int* indices = static_cast<const int*>(in[3]);
-    const T* data = static_cast<const float*>(in[4]);
+    const int* indptr = static_cast<const int*>(in[1]);
+    const int* indices = static_cast<const int*>(in[2]);
+    const T* data = static_cast<const float*>(in[3]);
     T* result = static_cast<float*>(out);
 
     // loop over the rows
