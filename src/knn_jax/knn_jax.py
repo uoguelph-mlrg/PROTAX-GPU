@@ -117,8 +117,6 @@ def _knn_lowering(ctx, indptr, indices, matdat, res, platform="cpu"):
     return [out]
 
 
-
-
 # =======================================================
 #            JIT Support for KNN v2 Primitive
 # =======================================================
@@ -183,27 +181,28 @@ def _knn_v2_lowering(ctx, indptr, indices, matdat, res):
 for _name, _value in cpu_ops.registrations().items():
     xla_client.register_custom_call_target(_name, _value, platform="cpu")
 
-# register GPU XLA custom calls
-for _name, _value in gpu_ops.registrations().items():
-    xla_client.register_custom_call_target(_name, _value, platform="gpu")
-
-
 # defining KNN primitive for JAX
 _knn_prim = core.Primitive("knn")
 _knn_prim.def_impl(partial(xla.apply_primitive, _knn_prim))
 _knn_prim.def_abstract_eval(_knn_abstract_eval)
 
-# connect XLA translation rules for JIT compilation
-mlir.register_lowering(_knn_prim, 
-                        partial(_knn_lowering, platform="gpu"),
-                        platform="gpu"
-)
 mlir.register_lowering(_knn_prim, 
                         partial(_knn_lowering, platform="cpu"),
                         platform="cpu"
 )
 
+# register GPU lowering if available
+if gpu_ops is not None:
+    for _name, _value in gpu_ops.registrations().items():
+        xla_client.register_custom_call_target(_name, _value, platform="gpu")
 
+    # connect XLA translation rules for JIT compilation
+    mlir.register_lowering(_knn_prim, 
+                            partial(_knn_lowering, platform="gpu"),
+                            platform="gpu"
+    )
+
+# ============ knn v2 ============
 # defining KNN v2 primitive
 _knn_v2_prim = core.Primitive("knn_v2")
 _knn_v2_prim.def_impl(partial(xla.apply_primitive, _knn_v2_prim))
