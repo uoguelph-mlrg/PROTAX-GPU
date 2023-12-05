@@ -1,6 +1,6 @@
 # PROTAX-GPU
 
-[Block_diagram_upd.pdf](https://github.com/uoguelph-mlrg/PROTAX-GPU/files/13322157/Block_diagram_upd.pdf)
+![alt text](img/Block_diagram_upd.pdf?raw=true)
 
 Code and experiments for PROTAX-GPU.
 A GPU-accelerated JAX-based implementation of [PROTAX](https://pubmed.ncbi.nlm.nih.gov/27296980/) 
