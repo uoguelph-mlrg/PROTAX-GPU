@@ -6,6 +6,17 @@ A GPU-accelerated JAX-based implementation of [PROTAX](https://pubmed.ncbi.nlm.n
 
 To reproduce the BOLD 7.8M dataset experiments, PROTAX-GPU requires a NVIDIA GPU with at least 8GB VRAM and CUDA compute capability 6.0 or later. This corresponds to GPUs in the NVIDIA Pascal, NVIDIA Volta™, NVIDIA Turing™, NVIDIA Ampere architecture, and NVIDIA Hopper™ architecture families.
 
+### Contents:
+
+[Functionality](https://github.com/uoguelph-mlrg/PROTAX-GPU#Functionality)<br>
+[Features](https://github.com/uoguelph-mlrg/PROTAX-GPU#Features)<br>
+[Organization](https://github.com/uoguelph-mlrg/PROTAX-GPU#Organization)<br>
+[Compatibility](https://github.com/uoguelph-mlrg/PROTAX-GPU#Compatibility)<br>
+[Installation](https://github.com/uoguelph-mlrg/PROTAX-GPU#Installation)<br>
+[Usage](https://github.com/uoguelph-mlrg/PROTAX-GPU#Usage)
+- [Inference](https://github.com/uoguelph-mlrg/PROTAX-GPU#Inference)
+- [Training](https://github.com/uoguelph-mlrg/PROTAX-GPU#Training)
+
 # Functionality
 Estimates the probability of each outcome in a taxonomic tree given a query barcode sequence compared to reference sequences.
 
