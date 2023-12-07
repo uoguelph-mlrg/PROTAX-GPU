@@ -2,26 +2,48 @@
 
 ![alt text](img/Block_diagram_upd.png?raw=true)
 
-Code and experiments for PROTAX-GPU.
-A GPU-accelerated JAX-based implementation of [PROTAX](https://pubmed.ncbi.nlm.nih.gov/27296980/) 
+A GPU-accelerated JAX-based implementation of [PROTAX](https://pubmed.ncbi.nlm.nih.gov/27296980/). Contains all code and experiments for PROTAX-GPU
+
+To reproduce the BOLD 7.8M dataset experiments, PROTAX-GPU requires a NVIDIA GPU with at least 8GB VRAM and CUDA compute capability 6.0 or later. This corresponds to GPUs in the NVIDIA Pascal, NVIDIA Volta™, NVIDIA Turing™, NVIDIA Ampere architecture, and NVIDIA Hopper™ architecture families.
 
 # Functionality
 Estimates the probability of each outcome in a taxonomic tree given a query barcode sequence compared to reference sequences.
 
-Requirements:
-- Python >=3.9
-- JAX 0.4.14
-- JAX 0.4.14+cuda12.cudnn89
-- NumPy 1.23.1
-- chex 0.1.82 
+- Uses JAX to accelerate sequence distance and probability decomposition calculations
+- Uses custom CUDA kernels to accelerate the calculation of the top-k most similar reference sequences
 
-Built & Tested on:
-- linux
-- CMake 3.27.5
-- CUDA 12.2
+**Features:**
+- CPU and GPU inference
+- Gradient-based optimization of model parameters
+- Compatible with TSV and PROTAX input format 
+- Full computation of all probabilities in the taxonomic tree
 
+**Organization:**
+```
+experiments/        All experiments for the paper
+lib/                C++/CUDA code for PROTAX-GPU
+scripts/            Scripts for training and inference
+├-- train.py        Trains a model with gradient descent 
+└-- convert.py      Converts .TSV to PROTAX-GPU format
+tests/              Unit tests 
+src/                
+├-- knn_jax/        JAX bindings for CUDA kernels
+└-- protax/         Main PROTAX-GPU code
+
+```
+
+# Compatibility:
+
+| **System** | **CPU** | **NVIDIA GPU** | **Apple GPU** |
+| --- | --- | --- | --- |
+| **Linux** | yes | yes | n/a |
+| **Mac X86_64** | yes | n/a | no |
+| **MAC (ARM)** | experimental | n/a | no |
+| **Windows** | experimental | experimental | n/a |
 
 # Installation:
+
+See `requirements.txt` for a list of what is required to run PROTAX-GPU. These instructions are for Linux and MacOS. Windows support is experimental.
 
 **1. Create & activate new environment (recommended)**
 
@@ -41,6 +63,8 @@ CUDA 12 + cuDNN:
 ```
 conda install -c nvidia cudatoolkit=12.2 cudnn=8.9
 ```
+
+**NOTE:** CUDA 11.2 is also supported by jax, but support for it will be dropped in the future. As long as the JAX version supports CUDA 11.2, and is greater than or equal to 0.4.14, this should work. 
 
 **3. Install JAX and jaxlib**
 
