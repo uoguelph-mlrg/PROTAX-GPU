@@ -1,0 +1,51 @@
+# Overview
+compile c-programs with make
+- classify_v0: distances are computed every time they are needed (re-doing same computations in every taxonomy level)
+- classify_v1: distances are computed only once and stored into memory
+- classify_v2: same as above but using binary representation for sequences
+
+NOTE: reading reference sequences and taxonomy takes time, but that is done at the beginning and is not included in the timing information
+- timing information includes only the classification function
+- `test.fa` can be multi-fasta file although in the example below it contains only once sequence
+
+
+# Sample usage
+
+Environment variables for brevity:
+```
+M=model
+PROGDIR=c
+```
+
+An example FASTA file `test.fa`:
+```
+cat test.fa
+>AAASF001-17	Arthropoda,Insecta,Diptera,Psychodidae,Phlebotominae,Phlebotomini,Lutzomyia,Lutzomyia_cruciata
+-ACATTATATTTTATTTTTGGAGCCTGAGCAGGAATAGTGGGAACATCTTTAAGAATTTTAATTCGAGCAGAATTAGGTCACCCCGGTGCTTTAATTGGTGATGATCAAATTTATAATGTTATTGTTACAGCTCATGCATTTGTAATAATTTTTTTTATAGTTATACCTATTATAATTGGAGGATTTGGTAACTGATTAGTTCCTTTAATATTAGGAGCCCCTGATATAGCATTCCCTCGAATAAATAATATAAGATTTTGACTTTTACCCCCCTCTCTTACTCTCCTTCTTACAAGAAGTATAGTTGAAACTGGGGCAGGAACAGGATGAACTGTTTATCCACCTCTTTCAAGAAATATTGCCCATAGAGGAGCTTCTGTTGATTTAGCAATTTTTTCCCTACATTTAGCCGGGATTTCATCTATTCTTGGAGCAGTAAATTTTATTACTACAGTTATTAATATACGATCTGCTGGAATTACATTAGATCGAATACCTTTATTTGTTTGATCTGTAATAATTACTGCGGTACTTCTATTATTATCATTACCTGTTTTAGCAGGTGCAATTACAATACTTCTAACTGATCGTAATCTAAATACTTCTTTTTTTGACCCTGCGGGAGGTGGGGATCCAATTTTATATCAACATTTATTT
+```
+
+Executing PROTAX classification with arguments and output:
+```
+$PROGDIR/classify_v0 $M/taxonomy.priors $M/refs.aln $M/model.rseqs.numeric $M/model.pars $M/model.scs 0.1 test.fa
+
+// stdout
+AAASF001-17 Arthropoda 0.999955 Arthropoda,Insecta 0.999955 Arthropoda,Insecta,Diptera 0.999955 Arthropoda,Insecta,Diptera,Psychodidae 0.999254 Arthropoda,Insecta,Diptera,Psychodidae,Phlebotominae 0.999206 Arthropoda,Insecta,Diptera,Psychodidae,Phlebotominae,Phlebotomini 0.999082 Arthropoda,Insecta,Diptera,Psychodidae,Phlebotominae,Phlebotomini,Lutzomyia 0.999065 Arthropoda,Insecta,Diptera,Psychodidae,Phlebotominae,Phlebotomini,Lutzomyia,Lutzomyia_cruciata 0.987557
+time: 17.000000 seconds
+```
+
+```
+$PROGDIR/classify_v1 $M/taxonomy.priors $M/refs.aln $M/model.rseqs.numeric $M/model.pars $M/model.scs 0.1 test.fa
+
+// stdout 
+AAASF001-17 Arthropoda 0.999955 Arthropoda,Insecta 0.999955 Arthropoda,Insecta,Diptera 0.999955 Arthropoda,Insecta,Diptera,Psychodidae 0.999254 Arthropoda,Insecta,Diptera,Psychodidae,Phlebotominae 0.999206 Arthropoda,Insecta,Diptera,Psychodidae,Phlebotominae,Phlebotomini 0.999082 Arthropoda,Insecta,Diptera,Psychodidae,Phlebotominae,Phlebotomini,Lutzomyia 0.999065 Arthropoda,Insecta,Diptera,Psychodidae,Phlebotominae,Phlebotomini,Lutzomyia,Lutzomyia_cruciata 0.987557
+time: 6.000000 seconds
+```
+
+```
+$PROGDIR/classify_v2 $M/taxonomy.priors $M/refs.aln $M/model.rseqs.numeric $M/model.pars $M/model.scs 0.1 test.fa
+
+// stdout
+distances: 1.121754 seconds
+AAASF001-17 Arthropoda 0.999955 Arthropoda,Insecta 0.999955 Arthropoda,Insecta,Diptera 0.999955 Arthropoda,Insecta,Diptera,Psychodidae 0.999254 Arthropoda,Insecta,Diptera,Psychodidae,Phlebotominae 0.999206 Arthropoda,Insecta,Diptera,Psychodidae,Phlebotominae,Phlebotomini 0.999082 Arthropoda,Insecta,Diptera,Psychodidae,Phlebotominae,Phlebotomini,Lutzomyia 0.999065 Arthropoda,Insecta,Diptera,Psychodidae,Phlebotominae,Phlebotomini,Lutzomyia,Lutzomyia_cruciata 0.987557
+classification: 0.040244 seconds
+```
