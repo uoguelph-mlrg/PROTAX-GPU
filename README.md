@@ -117,5 +117,10 @@ Instructions for running PROTAX-GPU for inference and training.
 # Hardware
 To reproduce the BOLD dataset experiments, PROTAX-GPU requires an NVIDIA GPU with at least 16GB VRAM and CUDA compute capability 6.0 or later. This corresponds to GPUs in the NVIDIA Pascal, NVIDIA Volta™, NVIDIA Turing™, NVIDIA Ampere architecture, and NVIDIA Hopper™ architecture families.
 
+# Datasets
+The BOLD 7.8M dataset is available [here](https://www.boldsystems.org/index.php/datarelease). The dataset is not included in this repository due to its size.
+
+The smaller FinPROTAX dataset is included in the `models` directory, sourced from [here](https://github.com/psomervuo/FinPROTAX).
+
 # License
 This project is licensed under the [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) License - see the [LICENSE](LICENSE) file for details.
