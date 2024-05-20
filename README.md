@@ -70,10 +70,7 @@ Cmake:
 conda install -c conda-forge cmake
 ```
 
-CUDA 12 + cuDNN:
-```
-conda install -c nvidia cudatoolkit=12.2 cudnn=8.9
-```
+CUDA 12.2 and cuDNN 8.9 are required for GPU support.
 
 **NOTE:** CUDA 11.2 is also supported by jax, but support for it will be dropped in the future. As long as the JAX version supports CUDA 11.2, and is greater than or equal to 0.4.14, this should work. 
 
