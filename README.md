@@ -54,53 +54,68 @@ src/
 
 # Installation:
 
-See `requirements.txt` for a list of what is required to run PROTAX-GPU. These instructions are for Linux and MacOS. Windows support is experimental.
+These instructions are for Linux and MacOS. Windows support is experimental.
 
-**1. Create & activate new environment (recommended)**
+## 1. Set up CUDA (required for GPU support)
 
-Conda:
+**IMPORTANT:** PROTAX-GPU requires a full local installation of CUDA, including development headers and tools, due to its use of custom CUDA kernels.
+
+- Install CUDA 12.2 from the [NVIDIA CUDA Toolkit website](https://developer.nvidia.com/cuda-downloads)
+- Install cuDNN 8.9 following the [official cuDNN installation guide](https://docs.nvidia.com/deeplearning/cudnn/install-guide/index.html)
+
+Ensure that your system environment variables are correctly set up to point to your CUDA installation.
+
+**NOTE:** While JAX offers an easier CUDA installation via pip wheels for some platforms, this method does not provide the full CUDA toolkit required by PROTAX-GPU. You must perform a local CUDA installation as described above.
+
+## 2. Create & activate new environment (recommended)
+
+Using Conda:
 ```
 conda create -n [name] python=3.10
 conda activate [name]
 ```
-**2. Install dependencies**
 
-Cmake:
+## 3. Install dependencies
+
+Install CMake:
 ```
 conda install -c conda-forge cmake
 ```
 
-CUDA 12.2 and cuDNN 8.9 are required for GPU support.
-
-**NOTE:** CUDA 11.2 is also supported by jax, but support for it will be dropped in the future. As long as the JAX version supports CUDA 11.2, and is greater than or equal to 0.4.14, this should work. 
-
-**3. Install JAX and jaxlib**
+## 4. Install JAX and jaxlib
 
 | **System** | **Type** | **Command** |
 | --- | --- | --- |
 | **Linux** | CPU | `pip install "jax[cpu]"`|
 | **Linux** | GPU | `pip install "jax[cuda122]"`
 | **MacOS** | CPU | `pip install "jax[cpu]" "jaxlib[cpu]"`|
-| **MacOS** | GPU | **TODO**|
+| **MacOS** | GPU | **Not yet supported**|
 
-**TODO**: Windows support, check macOS GPU support
+**NOTE:** The GPU installation command assumes you have already installed CUDA 12.2 as per step 1.
 
-**4. Install PROTAX-GPU**
+## 5. Install PROTAX-GPU
 
-Clone this repository.
+Clone this repository:
 ```
 git clone https://github.com/uoguelph-mlrg/PROTAX-GPU.git
+cd PROTAX-GPU
 ```
 
-Install `requirements.txt`
+Install requirements:
 ```
 pip install -r requirements.txt
 ```
 
-Finally, install PROTAX-GPU. This will install a package called `protax` in your environment.
+Finally, install PROTAX-GPU:
 ```
 pip install .
 ```
+
+This will install a package called `protax` in your environment.
+
+**NOTE:** CUDA 11.2 is also supported by JAX, but support for it will be dropped in the future. As long as the JAX version supports CUDA 11.2 and is greater than or equal to 0.4.14, this should work. However, ensure that your local CUDA installation matches the version you're using with JAX.
+
+**TODO**: Add Windows support instructions and check macOS GPU support
 
 # Usage
 Instructions for running PROTAX-GPU for inference and training.
