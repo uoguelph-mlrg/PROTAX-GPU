@@ -1,5 +1,7 @@
+import os
+
 from .protax_utils import read_model_jax, read_query, read_baseline
-from .model import get_probs
+from .model import get_probs, get_log_probs
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -112,7 +114,7 @@ def compute_perplexity(qdir, model_dir, tax_dir, verbose=False):
             break  # EOF
         
         start = time.time()
-        probs = model.get_log_probs(q, ok, tree, params, segnum, N).block_until_ready()
+        probs = get_log_probs(q, ok, tree, params, segnum, N).block_until_ready()
         end = time.time()
 
 
@@ -142,6 +144,7 @@ if __name__ == "__main__":
     # tax_dir, model_dir, query_dir = protax_args[1:4]
 
     # testing for now
-    query_dir = r"/home/roy/Documents/PROTAX-dsets/30k_small/refs.aln"
+    
+    query_dir = r"FinPROTAX/FinPROTAX/modelCOIfull/refs.aln"
     classify_file(query_dir, "models/params/model.npz", "models/ref_db/taxonomy37k.npz") 
     compute_perplexity(query_dir, "models/params/model.npz", "models/ref_db/taxonomy37k.npz")

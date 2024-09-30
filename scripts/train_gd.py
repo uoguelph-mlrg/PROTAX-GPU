@@ -15,20 +15,16 @@ from pathlib import Path
 import random
 import matplotlib.pyplot as plt
 from functools import partial
-
-
-debug_f = r"/home/roy/Documents/PROTAX-dsets/30k_small/debug.aln"
-train_dir = r"/home/roy/Documents/PROTAX-dsets/30k_small/refs.aln"
-targ_dir = "/home/roy/Documents/PROTAX-dsets/30k_small/30k-targets.csv"
+import argparse
 
 
 def CE_loss(log_probs, y_ind):
     """
-    Computes the cross-entropy loss between the log_probs and 
+    Computes the cross-entropy loss between the log_probs and
     labels y_ind.
 
     Args:
-        log_probs: Log probabilities returned by the model, shape (N, D) 
+        log_probs: Log probabilities returned by the model, shape (N, D)
         y_ind: Integer array of true class indices, shape (N,)
     """
     return -jnp.sum(jnp.take(log_probs, y_ind, axis=0))
@@ -80,11 +76,13 @@ def mask_n2s(n2s, node_state, i):
     # update empty but known entries
     node_state = np.logical_or(node_state, empty)
     node_state = np.concatenate((node_state, has_refs), axis=1)
-    
-    n2s = CSRWrapper(data=jnp.array(n2s.data),
-                        indices=jnp.array(n2s.indices), 
-                        indptr=jnp.array(n2s.indptr),
-                        shape=n2s.shape)
+
+    n2s = CSRWrapper(
+        data=jnp.array(n2s.data),
+        indices=jnp.array(n2s.indices),
+        indptr=jnp.array(n2s.indptr),
+        shape=n2s.shape,
+    )
 
     return n2s, jnp.array(node_state)
 
@@ -96,9 +94,9 @@ def load_params(pdir, tdir):
     tax = np.load(tax_dir.resolve())
     par = np.load(par_dir.resolve())
 
-    beta = par['beta']
-    sc = par['scalings']
-    lvl = tax['node_layer']
+    beta = par["beta"]
+    sc = par["scalings"]
+    lvl = tax["node_layer"]
 
     tax = np.load(tax_dir.resolve())
     par = np.load(par_dir.resolve())
@@ -106,19 +104,24 @@ def load_params(pdir, tdir):
     return beta, lvl, sc
 
 
-def train(train_config):
-    tree, params, N, segnum = protax_utils.read_model_jax("models/params/model.npz", "models/ref_db/taxonomy.npz")
+def train(train_config, train_dir, targ_dir):
+    tree, params, N, segnum = protax_utils.read_model_jax(
+        "models/params/model.npz", "models/ref_db/taxonomy37k.npz"
+    )
     pkey = jax.random.PRNGKey(0)
     lr = train_config["learning_rate"]
 
     beta = jax.random.uniform(pkey, (7, 4))
-    n2s = sp.csr_matrix((tree.node2seq.data, tree.node2seq.indices, tree.node2seq.indptr), shape=tree.node2seq.shape)
+    n2s = sp.csr_matrix(
+        (tree.node2seq.data, tree.node2seq.indices, tree.node2seq.indptr),
+        shape=tree.node2seq.shape,
+    )
     targ = get_targ(targ_dir)
     seq_list, ok_list = protax_utils.read_refs(train_dir)
     node_state = np.expand_dims(np.array(tree.node_state)[:, 0], 1)
 
     # params and node lvl
-    _, lvl, sc = load_params("models/params/model.npz", "models/ref_db/taxonomy.npz")
+    _, lvl, sc = load_params("models/params/model.npz", "models/ref_db/taxonomy37k.npz")
     loss_hist = []
     for e in range(train_config["num_epochs"]):
         print(f"epoch {e}")
@@ -140,11 +143,33 @@ def train(train_config):
 
             # masks out a node2seq column given reference index (~1.2 ms)
             tree.node2seq, tree.node_state = mask_n2s(n2s, node_state, i)
-            beta_grad += f_grad(q, ok, tree, beta, params.sc_mean, params.sc_var, N, segnum, targ.at[i].get(), lvl)
-            batch_loss += forward_jit(q, ok, tree, beta, params.sc_mean, params.sc_var, N, segnum, targ.at[i].get(), lvl)
+            beta_grad += f_grad(
+                q,
+                ok,
+                tree,
+                beta,
+                params.sc_mean,
+                params.sc_var,
+                N,
+                segnum,
+                targ.at[i].get(),
+                lvl,
+            )
+            batch_loss += forward_jit(
+                q,
+                ok,
+                tree,
+                beta,
+                params.sc_mean,
+                params.sc_var,
+                N,
+                segnum,
+                targ.at[i].get(),
+                lvl,
+            )
 
             if i % train_config["batch_size"] == 0:
-                beta = beta - lr*beta_grad
+                beta = beta - lr * beta_grad
                 loss_sum += batch_loss
                 curr_loss = batch_loss / train_config["batch_size"]
                 print("batch_loss: ", curr_loss)
@@ -152,26 +177,28 @@ def train(train_config):
                 batch_loss = 0
 
                 # grad norm
-                bflat = beta_grad.reshape(beta_grad.shape[0]*beta_grad.shape[1])
-                
-        
-        
+                bflat = beta_grad.reshape(beta_grad.shape[0] * beta_grad.shape[1])
+
         print("loss: ", loss_sum / seq_list.shape[0])
-        
+
         # save checkpoint
         mf = Path("models/params/m2.npz")
-        np.savez_compressed(
-            mf.resolve(),
-            beta = np.array(beta),
-            scalings = sc
-        )
+        np.savez_compressed(mf.resolve(), beta=np.array(beta), scalings=sc)
     plt.plot(loss_hist)
     plt.show()
-    
+
 
 if __name__ == "__main__":
+    # parse config from command line
+    parser = argparse.ArgumentParser(description="Train a model")
+    parser.add_argument("--train_dir", type=str, help="Path to training data")
+    parser.add_argument("--targ_dir", type=str, help="Path to target data")
+    args = parser.parse_args()
+    train_dir = Path(args.train_dir)
+    targ_dir = Path(args.targ_dir)
 
-    # TODO parse config from command line
+    # train_dir = r"/home/roy/Documents/PROTAX-dsets/30k_small/refs.aln"
+    # targ_dir = "/home/roy/Documents/PROTAX-dsets/30k_small/30k-targets.csv"
 
     # training config
     tc = {
@@ -180,4 +207,4 @@ if __name__ == "__main__":
         "num_epochs": 30,
     }
 
-    train(tc)
+    train(tc, train_dir, targ_dir)  # train the model

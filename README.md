@@ -49,7 +49,7 @@ src/
 | --- | --- | --- | --- |
 | **Linux** | yes | yes | n/a |
 | **Mac X86_64** | yes | n/a | no |
-| **MAC (ARM)** | experimental | n/a | no |
+| **MAC (ARM)** | yes | n/a | no |
 | **Windows** | experimental | experimental | n/a |
 
 # Installation:
@@ -88,7 +88,7 @@ conda install -c conda-forge cmake
 | --- | --- | --- |
 | **Linux** | CPU | `pip install "jax[cpu]"`|
 | **Linux** | GPU | `pip install "jax[cuda122]"`
-| **MacOS** | CPU | `pip install "jax[cpu]" "jaxlib[cpu]"`|
+| **MacOS** | CPU | `pip uninstall jax jaxlib && conda install -c conda-forge jax=0.4.26 jaxlib=0.4.23`|
 | **MacOS** | GPU | **Not yet supported**|
 
 **NOTE:** The GPU installation command assumes you have already installed CUDA 12.2 as per step 1.
@@ -117,14 +117,58 @@ This will install a package called `protax` in your environment.
 
 **TODO**: Add Windows support instructions and check macOS GPU support
 
+If you are on MacOS and facing installation issues, run the following commands
+```
+chmod +x ./scripts/fix_librhash.sh
+./scripts/fix_librhash.sh
+```
+
+
 # Usage
 Instructions for running PROTAX-GPU for inference and training.
 
 ## Inference
-**TODO**
+Once you have a trained model, you can use the classify_file function to classify query sequences.
+
+Run the sequence classification script:
+```
+python scripts/process_seqs.py [PATH_TO_QUERY_SEQUENCES] [PATH_TO_MODEL] [PATH_TO_TAXONOMY]
+```
+Example:
+
+```
+python scripts/process_seqs.py data/refs.aln models/params/model.npz models/ref_db/taxonomy37k.npz
+```
+<!-- python scripts/process_seqs.py FinPROTAX/FinPROTAX/modelCOIfull/refs.aln models/params/model.npz models/ref_db/taxonomy37k.npz -->
+
+Arguments:
+
+- `PATH_TO_QUERY_SEQUENCES`: File containing the sequences to classify (e.g., FASTA or alignment file)(Can use refs.aln from [FinPROTAX](https://github.com/psomervuo/FinPROTAX/tree/main) for experiment)
+- `PATH_TO_MODEL`: Path to the model. (Base Model is available in `models/params/model.npz`)
+- `PATH_TO_TAXONOMY`: Path to the taxonomy .npz file. (taxonomy file is available in `models/ref_db/taxonomy37k.npz`)
+
+
+Results are saved to `pyprotax_results.csv`
 
 ## Training
-**TODO**
+Run the script from the command line: You need to specify the paths to your training data and target data using the `--train_dir` and `--targ_dir` arguments, respectively.
+```
+python scripts/train_model.py --train_dir [PATH_TO_TRAINING_DATA] --targ_dir [PATH_TO_TARGET_DATA]
+```
+
+Command Line Arguments
+- `--train_dir`: Path to the training data (e.g., refs.aln).
+- `--targ_dir`: Path to the target data (e.g., targets.csv).
+
+Training Configuration
+The script uses the following training parameters:
+
+- Learning rate: `0.001`
+- Batch size: `500`
+- Number of epochs: `30`
+These parameters are predefined in the script and can be modified if needed by editing the dictionary `tc` in the code.
+
+The script uses `models/params/model.npz` as baseline and saves the trained model at `models/params/m2.npz`
 
 # Hardware
 To reproduce the BOLD dataset experiments, PROTAX-GPU requires an NVIDIA GPU with at least 16GB VRAM and CUDA compute capability 6.0 or later. This corresponds to GPUs in the NVIDIA Pascal, NVIDIA Volta™, NVIDIA Turing™, NVIDIA Ampere architecture, and NVIDIA Hopper™ architecture families.
