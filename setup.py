@@ -8,6 +8,11 @@ import platform
 
 HERE = os.path.dirname(os.path.realpath(__file__))
 pb11_dir = pybind11.get_include()
+import shutil
+# # Function to check if CUDA is available
+def cuda_available():
+    return shutil.which("nvcc") is not None
+
 
 
 class CMakeBuildExt(build_ext):
@@ -18,7 +23,8 @@ class CMakeBuildExt(build_ext):
         # First: configure CMake build
         import sys
         import sysconfig
-
+        print("cuda_available")
+        print(cuda_available())
         # Work out the relevant Python paths to pass to CMake, adapted from the
         # PyTorch build system
         install_dir = os.path.abspath(os.path.dirname(self.get_ext_fullpath("dummy")))
@@ -58,7 +64,8 @@ class CMakeBuildExt(build_ext):
         )
 
         # Add condition for ARM-based Macs to disable CUDA
-        if platform.system() == "Darwin" and platform.machine() == "x86_64":
+        # if platform.system() == "Darwin" and platform.machine() == "x86_64":
+        if not cuda_available():
             cmake_args.append("-DUSE_CUDA=OFF")
 
         os.makedirs(self.build_temp, exist_ok=True)
@@ -91,7 +98,8 @@ extensions = [
 ]
 
 # Add GPU ops only if not on ARM-based Mac
-if platform.system() != "Darwin":
+# if platform.system() != "Darwin":
+if cuda_available():
     extensions.append(
         Extension(
             name="knn_jax.gpu_ops",
