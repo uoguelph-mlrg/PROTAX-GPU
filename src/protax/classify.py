@@ -41,6 +41,27 @@ def read_names(tdir):
 
     return names
 
+def validate_taxonomy_query(tree, query, ok_query):
+    """
+    Validate that the taxonomy and query dimensions match.
+
+    Args:
+        tree: TaxTree object containing taxonomy information.
+        query: Query sequence array.
+        ok_query: Boolean array indicating valid positions in the query.
+
+    Raises:
+        ValueError: If dimensions are incompatible.
+    """
+    # Check the number of positions in references and query
+    if tree.refs.shape[1] != query.shape[0]:
+        raise ValueError(f"Mismatch in sequence lengths: "
+                         f"taxonomy={tree.refs.shape[1]} vs query={query.shape[0]}")
+
+    # Check ok_pos and ok_query have the same length
+    if tree.ok_pos.shape[1] != ok_query.shape[0]:
+        raise ValueError(f"Mismatch in valid positions: "
+                         f"taxonomy={tree.ok_pos.shape[1]} vs query={ok_query.shape[0]}")
 
 def classify_file(qdir, par_dir, tax_dir, verbose=False):
     """
@@ -62,6 +83,8 @@ def classify_file(qdir, par_dir, tax_dir, verbose=False):
         curr = curr.replace('|', '\t').split('\t')
         seqs = f.readline().strip('\n')
         q, ok = read_query(seqs)
+
+        validate_taxonomy_query(tree, q, ok)
 
         curr_name = ''.join(curr[1:])
         if not seqs:

@@ -6,7 +6,7 @@ from protax.taxonomy import CSRWrapper
 import numpy as np
 from scipy.sparse import csr_matrix
 from knn_jax import knn
-
+import shutil
 import logging
 
 jax_key = jax.random.PRNGKey(0)
@@ -74,16 +74,26 @@ def bench_knn():
 #                Unit Tests
 # ======================================
 
+# # Function to check if CUDA is available
+
+def cuda_available():
+    return shutil.which("nvcc") is not None
+
 def test_topk_platforms():
     cpu_knn = jax.jit(knn, backend="cpu", static_argnums=(3,))
-    gpu_knn = jax.jit(knn, backend="gpu", static_argnums=(3,))
 
     N = N2S_SMALL.shape[0]
     cpu_res = cpu_knn(N2S_SMALL.indptr, N2S_SMALL.indices, N2S_SMALL.data, N).block_until_ready()
-    gpu_res = gpu_knn(N2S_SMALL.indptr, N2S_SMALL.indices, N2S_SMALL.data, N).block_until_ready()
 
-    cpu_res = jax.device_put(cpu_res, jax.devices("gpu")[0])
-    assert jnp.all(cpu_res == gpu_res)
+    if(cuda_available()):
+        gpu_knn = jax.jit(knn, backend="gpu", static_argnums=(3,))
+        gpu_res = gpu_knn(N2S_SMALL.indptr, N2S_SMALL.indices, N2S_SMALL.data, N).block_until_ready()
+        cpu_res = jax.device_put(cpu_res, jax.devices("gpu")[0])
+        assert jnp.all(cpu_res == gpu_res)
+    else:   
+        logging.warning("CUDA not available, skipping GPU tests")
+        return
+    
 
 def test_topk_small():
 
