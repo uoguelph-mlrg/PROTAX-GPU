@@ -71,7 +71,7 @@ Ensure that your system environment variables are correctly set up to point to y
 
 Using Conda:
 ```
-conda create -n [name] python=3.10
+conda create -n [name] python=3.12
 conda activate [name]
 ```
 
