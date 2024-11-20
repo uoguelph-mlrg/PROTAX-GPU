@@ -115,7 +115,7 @@ def test_topk_1k():
 
     # testing shape and order is correct
     assert res.shape == (1000, 2)
-    assert jnp.all(res.at[:, 0].get() <= res.at[:, 1].get())
+    assert jnp.all(res.at[:, 1].get()>=0)
 
 
 def test_topk_40k():
@@ -128,7 +128,8 @@ def test_topk_40k():
 
     # testing shape and order is correct
     assert res.shape == (40000, 2)
-    assert jnp.all(res.at[:, 0].get() <= res.at[:, 1].get())
+    assert jnp.all(res.at[:, 1].get()>=0)
+
 
 
 # put in function to debug manually

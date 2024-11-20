@@ -35,10 +35,11 @@ void cpu_min_k_row(const int N, const int row, const int* indptr, const int* ind
             m2 = val;
         }
     }
+
+    m2-=m1;
     // write out the result
     result[row*2] = m1;
     result[row*2+1] = m2;
-
 }
 
 template <typename T>
