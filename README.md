@@ -2,7 +2,7 @@
 
 ![alt text](img/Block_diagram_upd.png?raw=true)
 
-A GPU-accelerated JAX-based implementation of [PROTAX](https://pubmed.ncbi.nlm.nih.gov/27296980/). Contains all code and experiments for PROTAX-GPU
+A GPU-accelerated JAX-based implementation of [PROTAX](https://pubmed.ncbi.nlm.nih.gov/27296980/). Contains all code and experiments for [PROTAX-GPU](https://royalsocietypublishing.org/doi/10.1098/rstb.2023.0124)
 
 To reproduce the BOLD 7.8M dataset experiments, PROTAX-GPU requires a NVIDIA GPU with at least 8GB VRAM and CUDA compute capability 6.0 or later. This corresponds to GPUs in the NVIDIA Pascal, NVIDIA Volta™, NVIDIA Turing™, NVIDIA Ampere architecture, and NVIDIA Hopper™ architecture families.
 
@@ -132,12 +132,12 @@ Once you have a trained model, you can use the classify_file function to classif
 
 Run the sequence classification script:
 ```
-python scripts/process_seqs.py [PATH_TO_QUERY_SEQUENCES] [PATH_TO_MODEL] [PATH_TO_TAXONOMY]
+python scripts/process_seqs.py [PATH_TO_QUERY_SEQUENCES] [PATH_TO_MODEL] [PATH_TO_TAXONOMY] [PATH_TO_TAXONOMY_MAPPING]
 ```
 Example:
 
 ```
-python scripts/process_seqs.py data/refs.aln models/params/model.npz models/ref_db/taxonomy37k.npz
+python scripts/process_seqs.py data/refs.aln models/params/model.npz models/ref_db/taxonomy37k.npz data/tax_mapping.priors
 ```
 <!-- python scripts/process_seqs.py FinPROTAX/FinPROTAX/modelCOIfull/refs.aln models/params/model.npz models/ref_db/taxonomy37k.npz -->
 
@@ -146,9 +146,92 @@ Arguments:
 - `PATH_TO_QUERY_SEQUENCES`: File containing the sequences to classify (e.g., FASTA or alignment file)(Can use refs.aln from [FinPROTAX](https://github.com/psomervuo/FinPROTAX/tree/main) for experiment)
 - `PATH_TO_MODEL`: Path to the model. (Base Model is available in `models/params/model.npz`)
 - `PATH_TO_TAXONOMY`: Path to the taxonomy .npz file. (taxonomy file is available in `models/ref_db/taxonomy37k.npz`)
-
+- `PATH_TO_TAXONOMY_MAPPING`: Path for taxonomy mapping (node to label mapping) (Can use taxonomy.prior from [FinPROTAX](https://github.com/psomervuo/FinPROTAX/tree/main) for experiment)
 
 Results are saved to `pyprotax_results.csv`
+
+<details>
+<summary> <b>More details regarding input file formats </b></summary>
+
+#### Structure of Query File (`PATH_TO_QUERY_SEQUENCES`)
+
+The query file (`qdir`) contains data in the following structure:
+
+1. **Header Line (Taxonomic Metadata)**  
+   - Starts with `>` followed by a unique identifier for the query sequence.  
+   - Contains the full taxonomic lineage associated with the query, separated by commas.  
+   - Example:  
+     ```
+     >COLFA029-10	Insecta,Coleoptera,Ptiliidae,Acrotrichinae,Acrotrichini,Acrotrichis
+     ```
+
+2. **Sequence Line**  
+   - Contains the DNA sequence corresponding to the query.  
+   - The sequence can include standard nucleotide codes (e.g., A, T, C, G).  
+
+   #### Structure of `PATH_TO_MODEL` (`.npz` file)
+
+The `par_dir` file is a compressed `.npz` archive that contains the trained parameters of the PROTAX model. The file should include the following arrays:
+
+1. **`beta`**  
+   - Shape: `(M, R)`  
+   - Description: Coefficients for the regression model, where `M` is the number of features and `R` is the number of ranks in the taxonomy.  
+
+2. **`scalings`**  
+   - Shape: `(R, 4)`  
+   - Description: Scaling parameters for the regression model. Each row corresponds to a rank in the taxonomy and contains four values:
+     - Mean scaling (columns 0 and 2).
+     - Variance scaling (columns 1 and 3).  
+
+3. **`node_layer`**  
+   - Shape: `(N,)`  
+   - Description: Indicates the layer (rank) in the taxonomy tree to which each node belongs. 
+
+#### Structure of the `PATH_TO_TAXONOMY` `.npz` File
+
+The `tax_dir` file is a serialized representation of the taxonomy and sequence data required by the PROTAX-GPU model. Below is the description of the required structure for the `.npz` file:
+
+1. **`refs`**: A 2D array of shape `(R, L)`, where `R` is the number of reference sequences and `L` is the sequence length. Each row represents a reference sequence.
+
+2. **`ok_pos`**: A binary 2D array of shape `(R, L)`, indicating valid positions (non-missing data) for each reference sequence.
+
+3. **`priors`**: A 1D array of length `N`, where `N` is the number of nodes in the taxonomy. It specifies prior probabilities for each node.
+
+4. **`segments`**: A 1D array of length `N`, containing segment identifiers for each node in the taxonomy.
+
+5. **`paths`**: A 2D array of shape `(N, D)`, where `D` is the maximum depth of the taxonomy. Each row represents the path from the root node to a specific taxon.
+
+6. **`node_state`**: A 2D array of shape `(N, S)`, where `S` is the state size (typically 2). Contains state information for each node in the taxonomy.
+
+7. **`ref_rows` and `ref_cols`**: Two 1D arrays defining the row and column indices for mapping reference sequences to nodes in the taxonomy. These are used to construct a sparse binary matrix (`node2seq`).
+
+8. **`node_layer`**: A 1D array of length `N`, defining the taxonomic layer (or rank) for each node.
+
+
+
+#### Taxonomy Mapping File (`PATH_TO_TAXONOMY_MAPPING`) Format
+
+The `tax_map` file defines the mapping between node numbers and their corresponding taxonomy labels in the taxonomy tree. Each line in the file represents a single node and its associated data.
+
+The `tax_map` file should be a tab-separated text file , where each line contains information for one node. It must adhere to the following format:
+
+| Column Name    | Description                                                               |
+|----------------|---------------------------------------------------------------------------|
+| **Node Number** | A unique integer ID representing a node in the taxonomy tree.            |
+| **Other Fields**| Possible Additional metadata or numeric attributes (optional).                    |
+| **Taxonomy Label** | A string representing the taxonomy label for the node (e.g., "Insecta"). |
+
+
+</details>
+
+
+## Output 
+The `pyprotax_results.csv` file contains the taxonomic labels and their associated probabilities for each query, organized based on the hierarchical traversal of the taxonomy. The structure of the output aligns with the traversal paths of the taxonomy from the root to the leaves, ensuring consistency in representation across runs. Here’s a detailed explanation of the output:
+
+- **Columns 1–7**: These columns represent the taxonomic labels at each level of the hierarchy. Each row corresponds to a single query, and these columns specify the path from the root node to the assigned taxon. For instance, a row might represent the path `[Insecta, Coleoptera, Ptiliidae, Acrotrichinae Acrotrichini Acrotrichis Acrotrichis_rugulosa]`, reflecting the taxonomic lineage of a species.
+
+- **Columns 8–14**: These columns contain the probabilities associated with each taxonomic label at every level of the hierarchy for the given query. These probabilities are computed as the product of branch probabilities along the path, as determined by the traversal of the taxonomy.
+
 
 ## Training
 Run the script from the command line: You need to specify the paths to your training data and target data using the `--train_dir` and `--targ_dir` arguments, respectively.
