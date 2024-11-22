@@ -171,7 +171,7 @@ def _knn_v2_lowering(ctx, indptr, indices, matdat, res):
 
         out = custom_call(
             b"gpu_knn_v2_f32",  # call target name
-            out_types=[res_type],
+            result_types=[res_type],
             operands=[indptr, indices, matdat],
             operand_layouts=default_layouts(
                 ip_type.shape, idx_type.shape, md_type.shape

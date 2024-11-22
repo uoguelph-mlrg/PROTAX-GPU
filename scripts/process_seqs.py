@@ -5,7 +5,7 @@ if __name__ == "__main__":
     protax_args = sys.argv
     if len(protax_args) < 4:
         print(
-            "Usage: python3 classify.py [PATH_TO_TAXONOMY_FILE] [PATH_TO_PARAMETERS] [PATH_TO_QUERY_SEQUENCES]"
+            "Usage: python scripts/process_seqs.py [PATH_TO_QUERY_SEQUENCES] [PATH_TO_PARAMETERS] [PATH_TO_TAXONOMY_FILE]"
         )
 
     query_dir, model_dir, tax_dir = protax_args[1:4]

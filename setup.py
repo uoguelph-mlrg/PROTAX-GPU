@@ -9,7 +9,7 @@ import platform
 HERE = os.path.dirname(os.path.realpath(__file__))
 pb11_dir = pybind11.get_include()
 import shutil
-# # Function to check if CUDA is available
+# Function to check if CUDA is available
 def cuda_available():
     return shutil.which("nvcc") is not None
 

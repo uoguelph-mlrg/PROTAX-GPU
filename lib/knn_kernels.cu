@@ -73,7 +73,7 @@ __global__ void min_k(const int N, const int* indptr, const int* indices,
           m2 = val;
         }
     }
-
+    
     m2 = m2-min_val;
     // store the minimum value in the result array
     result[i*2] = min_val;
