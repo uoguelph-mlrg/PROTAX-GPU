@@ -37,10 +37,8 @@ scripts/            Scripts for training and inference
 ├-- train.py        Trains a model with gradient descent 
 └-- convert.py      Converts .TSV to PROTAX-GPU format
 tests/              Unit tests 
-src/                
-├-- knn_jax/        JAX bindings for CUDA kernels
-└-- protax/         Main PROTAX-GPU code
-
+protax/             Main PROTAX-GPU code   
+├-- ops/            JAX bindings for CUDA kernels
 ```
 
 # Compatibility:
