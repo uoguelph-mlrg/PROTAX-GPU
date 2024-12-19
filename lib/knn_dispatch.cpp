@@ -27,6 +27,5 @@ PYBIND11_MODULE(gpu_ops, m){
     m.def("build_knn_descriptor_batched",
           [](int rows, int batch_size) { return PackDescriptor(KNNDescriptor{rows, 2, batch_size}); });
 }
-
 } 
 

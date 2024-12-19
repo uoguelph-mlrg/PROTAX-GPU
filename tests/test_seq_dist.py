@@ -1,10 +1,9 @@
 from protax.protax_utils import read_query, str2batch_query
-from protax.model import seq_dist
+from protax.model import seq_dist, seq_dist2
 import jax
 import jax.numpy as jnp
 import random
 import time
-import numpy as np
 
 
 SEQ_LEN = 15
@@ -24,6 +23,23 @@ def gen_seq(d):
 #                Unit Tests
 # ======================================
 
+def test_mixed():
+    """
+    Test sequence distance on sequences with mixed
+    base pairs
+    """
+    # 6/8 matches
+    #    M*M--MMM--M*-
+    q = "ATGC-AAT--TGG"
+    r = "AGG-AAAT--TA-"
+    q, q_ok = read_query(q)
+    r, r_ok = read_query(r)
+
+    r = jnp.array([r])
+    r_ok = jnp.array([r_ok])
+
+    assert seq_dist(q, r, r_ok, q_ok) == 0.25
+
 def test_no_match():
     """
     Test two sequence distances with no matching base pairs
@@ -41,16 +57,21 @@ def test_no_match():
 
 
 def test_no_match_batched():
+    """
+    test batched sequence distance on a batch of 2 references
+    and 4 queries
+    """
 
-    # 2 references, 4 queries
-    queries = [''.join([c for i in range(SEQ_LEN)]) for c in "AGC-"]
-    r = ''.join(['T' for i in range(SEQ_LEN)])
+    # remove all instances of thymine in queries
+    q_tmp = ("AGC-"*(SEQ_LEN // (3)))[:SEQ_LEN]
+    queries = [q_tmp for _ in range(4)]
+    r = ''.join(['T' for _ in range(SEQ_LEN)])
 
     queries, q_ok = str2batch_query(queries)
     r, r_ok = read_query(r)
     r = jnp.array([r, r])
     r_ok = jnp.array([r_ok, r_ok])
-
+    
     batch_sd = jax.vmap(seq_dist, (0, None, None, 0), 0)
     c = batch_sd(queries, r, r_ok, q_ok)
     
@@ -61,7 +82,7 @@ def test_no_match_batched():
 #              Benchmarks
 # ======================================
 
-def test_1seq_scaling():
+def bench_1seq_scaling():
     """
     Test sequence distance with 1 query sequence as reference database size increases
     """
@@ -86,4 +107,6 @@ def test_1seq_scaling():
     print("Took", end - start, "seconds")
 
 if __name__ == "__main__":
-    test_1seq_scaling()
+    test_no_match()
+    test_no_match_batched()
+    # bench_1seq_scaling()

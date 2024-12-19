@@ -1,0 +1,21 @@
+[project]
+name = "protax"
+version = "0.1.0"
+authors = [
+	{name="Roy Li"}
+]
+description = "A Python package for GPU accelerated DNA barcoding"
+dependencies = [
+	"numpy",
+	"scipy",
+	"pandas",
+]
+
+[build-system]
+requires = ["scikit-build-core", "pybind11"]
+build-backend = "scikit_build_core.build"
+
+[tool.scikit-build]
+build.verbose = true
+cmake.build-type = "Release"
+

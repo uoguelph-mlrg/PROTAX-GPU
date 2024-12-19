@@ -91,47 +91,9 @@ def classify_file(qdir, par_dir, tax_dir, verbose=False):
     print(f"finished in {tot_time}s")
 
 
-def compute_perplexity(qdir, model_dir, tax_dir, verbose=False):
-    """
-    compute perplexity on dataset
-    """
 
-    tree, params, N, segnum = read_model_jax(model_dir, tax_dir)
-    f = open(qdir)
-    tot_time = 0
-
-    layers = load_layer(tax_dir)
-    num_layers = jax.ops.segment_sum(jnp.ones(layers.shape[0], dtype=int), layers)
-    
-    n = 0
-    perplexity = jnp.zeros(8)
-    while True:
-        curr = f.readline().strip('\n').split('\t')[0]
-        seqs = f.readline().strip('\n')
-        q, ok = read_query(seqs)
-
-        if not seqs:
-            break  # EOF
-        
-        start = time.time()
-        probs = get_log_probs(q, ok, tree, params, segnum, N).block_until_ready()
-        end = time.time()
-
-
-        probs = probs *jnp.exp(probs)
-        # mask out paths which end short
-        probs = jnp.take(probs, tree.paths, fill_value=-1)*(tree.paths != N)
-
-        # aggregate entropy
-        curr_p = -jnp.sum(probs, axis=0) 
-        perplexity += curr_p
-        n += 1
-
-        tot_time += end-start
-
-    # saving results
-    print(jnp.exp(perplexity / n))
-    print(f"finished in {tot_time}s")
+def classify(q, ok, tree, params, segnum, N):
+    pass
 
 
 
@@ -148,3 +110,4 @@ if __name__ == "__main__":
     query_dir = r"FinPROTAX/FinPROTAX/modelCOIfull/refs.aln"
     classify_file(query_dir, "models/params/model.npz", "models/ref_db/taxonomy37k.npz") 
     compute_perplexity(query_dir, "models/params/model.npz", "models/ref_db/taxonomy37k.npz")
+

@@ -1,5 +1,5 @@
 numpy
-chex==0.1.85
 pybind11
 scipy
 pandas
+ninja

@@ -3,14 +3,6 @@
 # custom KNN functions that are implemented in C++/CUDA.
 # =======================================================
 __all__ = ["knn, knn_v2"]
-import sys
-import site
-
-# Get site-packages path and add to sys.path
-site_packages = site.getsitepackages()[0]  # This will point to site-packages
-sys.path.append(site_packages)
-sys.path.append(f"{site_packages}/knn_jax")
-import cpu_ops
 
 from jax.lib import xla_client
 from jax import core
@@ -24,6 +16,14 @@ from functools import partial
 import numpy as np
 import jax.numpy as jnp
 from jax.experimental import sparse
+
+# cpp extensions
+from . import cpu_ops
+try:
+    from . import gpu_ops
+    is_gpu_available = True
+except ImportError:
+    is_gpu_available = False
 
 
 # =======================================================
@@ -76,8 +76,8 @@ def _knn_abstract_eval(indptr, indices, matdat, res):
 
 def _knn_lowering(ctx, indptr, indices, matdat, res, platform="cpu"):
     """
-    MLIR lowering for knn primitive where k=2.
-    i.e. lowering primitive to MLIR custom call (knn kernel dispatch)
+    MLIR lowering rule for knn primitive where k=2.
+    i.e. lowering knn primitive to MLIR custom call
 
     ctx: mlir.LoweringRuleContext
     """
@@ -95,8 +95,6 @@ def _knn_lowering(ctx, indptr, indices, matdat, res, platform="cpu"):
     if mat_dtype != jnp.float32:
         raise NotImplementedError(f"unsupported dtype: {mat_dtype}")
     if platform == "gpu":
-        import gpu_ops
-
         # create opaque descriptor for problem size
         opaque = gpu_ops.build_knn_descriptor(N)
         out = custom_call(
@@ -161,7 +159,7 @@ def _knn_v2_lowering(ctx, indptr, indices, matdat, res):
     if mat_dtype != jnp.float32:
         raise NotImplementedError(f"unsupported dtype: {mat_dtype}")
     try:
-        import gpu_ops
+        from . import gpu_ops
 
         if gpu_ops is None:
             raise ValueError("gpu_ops not compiled")
@@ -188,15 +186,6 @@ def _knn_v2_lowering(ctx, indptr, indices, matdat, res):
 # =======================================================
 #             Registering KNN Primitive
 # =======================================================
-
-
-try:
-    import gpu_ops
-
-    is_gpu_available = True
-except ImportError:
-    is_gpu_available = False
-
 # register CPU XLA custom calls
 for _name, _value in cpu_ops.registrations().items():
     xla_client.register_custom_call_target(_name, _value, platform="cpu")

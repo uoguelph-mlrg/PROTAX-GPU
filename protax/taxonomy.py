@@ -1,20 +1,14 @@
-import chex
-from jax.experimental import sparse
+import jax
+from typing import NamedTuple
 
 
-@chex.dataclass
-class CSRWrapper():
-    """
-    Simple dataclass to wrap CSR data
-    """
-    data: chex.ArrayDevice
-    indices: chex.ArrayDevice
-    indptr: chex.ArrayDevice
+class CSRWrapper(NamedTuple):
+    data: jax.Array
+    indices: jax.Array
+    indptr: jax.Array
     shape: tuple
 
-
-@chex.dataclass
-class TaxTree():
+class TaxTree(NamedTuple):
     """
     State of the taxonomic tree
 
@@ -32,21 +26,20 @@ class TaxTree():
     descendants: descendants of each node
     unk: Whether the node at this index represents an unknown species or not
     """
-    refs: chex.ArrayDevice           # [R, 5]
-    ok_pos: chex.ArrayDevice         # [R]
-    segments: chex.ArrayDevice       # [N]
+    refs: jax.Array                  # [R, 5]
+    ok_pos: jax.Array                # [R]
+    segments: jax.Array              # [N]
     node2seq: CSRWrapper             # [N]
-    paths: chex.ArrayDevice          # [N]
-    node_state: chex.ArrayDevice     # [N, 2]
-    prior: chex.ArrayDevice
+    paths: jax.Array                 # [N]
+    node_state: jax.Array            # [N, 2]
+    prior: jax.Array
 
 
-@chex.dataclass
-class ProtaxModel():
+class ProtaxModel(NamedTuple):
     """
     Contains parameters for PROTAX model
     """
     
-    beta: chex.ArrayDevice
-    sc_mean: chex.ArrayDevice
-    sc_var: chex.ArrayDevice
+    beta: jax.Array
+    sc_mean: jax.Array
+    sc_var: jax.Array

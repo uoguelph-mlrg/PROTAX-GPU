@@ -4,16 +4,11 @@ Functions for reading from files used by PROTAX
 import jax
 import numpy as np
 import jax.numpy as jnp
-from jax.experimental import sparse
 from .taxonomy import CSRWrapper, TaxTree, ProtaxModel
 from scipy.sparse import csr_matrix
 
-from functools import reduce
 import pandas as pd
-
-import sys
 from pathlib import Path
-import time
 
 
 def read_params(pdir):
