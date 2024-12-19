@@ -4,7 +4,7 @@ from jax.experimental import sparse
 from functools import partial
 import numpy as np
 from functools import partial
-from knn_jax import knn, knn_v2
+from .ops import knn, knn_v2
 
 # @jax.jit
 def seq_dist(q, seqs, ok, ok_query):
@@ -22,6 +22,20 @@ def seq_dist(q, seqs, ok, ok_query):
     return 1 - (match_tots / ok)
 
 
+def seq_dist2(s1, s2):
+    """
+    Alternative cleaner seqdist implementation
+
+    s1: (5, d) one-hot sequence
+    s2: (5, d) one-hot sequence
+    """
+    intersect = jnp.bitwise_and(s1, s2)
+    matches = jax.lax.population_count(intersect, axis=1)
+    
+    n_ok = jnp.sum(matches.at[4].get())
+    return jnp.sum(matches.at[:4].get()) / n_ok
+
+
 
 def get_X(q, ok_q, tree, N, sc_mean, sc_var):
     """
@@ -34,9 +48,8 @@ def get_X(q, ok_q, tree, N, sc_mean, sc_var):
     # TODO maybe use custom BCSR multiplication kernel
     # or can also be replaced with a take operation
     new_dat = jnp.take(dists, node2seq.indices)
-    node2seq.data = new_dat
 
-    X = knn(node2seq.indptr, node2seq.indices, node2seq.data, N)
+    X = knn(node2seq.indptr, node2seq.indices, new_dat, N)
     X = (((X - sc_mean) / sc_var).T*(tree.node_state[:, 1])).T
     X = jnp.concatenate((tree.node_state, X), axis=1)
     return X
@@ -125,12 +138,9 @@ def get_log_probs(q, ok, tree, params, segnum, N):
     bprobs = fill_log_bprob(X, params.beta, tree, segnum)
     return jnp.sum(bprobs, axis=1)
 
-@partial(jax.jit, static_argnums=(4, 5))
+# @partial(jax.jit, static_argnums=(4, 5))
 def get_probs(q, ok, tree, params, segnum, N):
     X = get_X(q, ok, tree, N, params.sc_mean, params.sc_var)
     bprobs = fill_bprob(X, params.beta, tree, segnum)
     return jnp.prod(bprobs, axis=1)
 
-
-if __name__ == '__main__':
-    print(jax.devices())

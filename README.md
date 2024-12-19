@@ -60,8 +60,8 @@ These instructions are for Linux and MacOS. Windows support is experimental.
 
 **IMPORTANT:** PROTAX-GPU requires a full local installation of CUDA, including development headers and tools, due to its use of custom CUDA kernels.
 
-- Install CUDA 12.2 from the [NVIDIA CUDA Toolkit website](https://developer.nvidia.com/cuda-downloads)
-- Install cuDNN 8.9 following the [official cuDNN installation guide](https://docs.nvidia.com/deeplearning/cudnn/install-guide/index.html)
+- Install CUDA >= 12 from the [NVIDIA CUDA Toolkit website](https://developer.nvidia.com/cuda-downloads)
+- Install cuDNN >= 8.9 following the [official cuDNN installation guide](https://docs.nvidia.com/deeplearning/cudnn/install-guide/index.html)
 
 Ensure that your system environment variables are correctly set up to point to your CUDA installation.
 
@@ -75,19 +75,12 @@ conda create -n [name] python=3.12
 conda activate [name]
 ```
 
-## 3. Install dependencies
-
-Install CMake:
-```
-conda install -c conda-forge cmake
-```
-
 ## 4. Install JAX and jaxlib
 
 | **System** | **Type** | **Command** |
 | --- | --- | --- |
 | **Linux** | CPU | `pip install "jax[cpu]"`|
-| **Linux** | GPU | `pip install "jax[cuda122]"`
+| **Linux** | GPU | `pip install "jax[cuda12]"`
 | **MacOS** | CPU | `pip uninstall jax jaxlib && conda install -c conda-forge jax=0.4.26 jaxlib=0.4.23`|
 | **MacOS** | GPU | **Not yet supported**|
 
@@ -100,13 +93,8 @@ Clone this repository:
 git clone https://github.com/uoguelph-mlrg/PROTAX-GPU.git
 cd PROTAX-GPU
 ```
+Build and install PROTAX-GPU:
 
-Install requirements:
-```
-pip install -r requirements.txt
-```
-
-Finally, install PROTAX-GPU:
 ```
 pip install .
 ```
@@ -114,8 +102,6 @@ pip install .
 This will install a package called `protax` in your environment.
 
 **NOTE:** CUDA 11.2 is also supported by JAX, but support for it will be dropped in the future. As long as the JAX version supports CUDA 11.2 and is greater than or equal to 0.4.14, this should work. However, ensure that your local CUDA installation matches the version you're using with JAX.
-
-**TODO**: Add Windows support instructions and check macOS GPU support
 
 If you are on MacOS and facing installation issues, run the following commands
 ```

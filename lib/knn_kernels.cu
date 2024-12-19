@@ -73,7 +73,8 @@ __global__ void min_k(const int N, const int* indptr, const int* indices,
           m2 = val;
         }
     }
-    
+
+    // we actually store the diff
     m2 = m2-min_val;
     // store the minimum value in the result array
     result[i*2] = min_val;
@@ -93,7 +94,7 @@ inline void dispatch_min_k(cudaStream_t stream, void** buffers, const char* opaq
     T *data = reinterpret_cast<T *>(buffers[2]);
     T *result = reinterpret_cast<T *>(buffers[3]);
 
-    // equivalent to ceil(N/THREADS_PER_BLOCK)
+    // ceil(N/THREADS_PER_BLOCK)
     min_k<<<(N+THREADS_PER_BLOCK-1)/THREADS_PER_BLOCK, THREADS_PER_BLOCK, 0, stream>>>(N, indptr, indices, data, result);
 }
 
