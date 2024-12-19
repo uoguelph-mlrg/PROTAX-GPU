@@ -75,7 +75,7 @@ conda create -n [name] python=3.12
 conda activate [name]
 ```
 
-## 4. Install JAX and jaxlib
+## 3. Install JAX and jaxlib
 
 | **System** | **Type** | **Command** |
 | --- | --- | --- |
@@ -86,7 +86,7 @@ conda activate [name]
 
 **NOTE:** The GPU installation command assumes you have already installed CUDA 12.2 as per step 1.
 
-## 5. Install PROTAX-GPU
+## 4. Install PROTAX-GPU
 
 Clone this repository:
 ```
