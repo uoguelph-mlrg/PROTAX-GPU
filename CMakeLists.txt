@@ -6,7 +6,6 @@ message(STATUS "Using CMake version " ${CMAKE_VERSION})
 # libs
 set(PYBIND11_NEWPYTHON ON)
 find_package(pybind11 CONFIG REQUIRED)
-include_directories(${CMAKE_SOURCE_DIR}/lib)
 
 # --------------------------------------------------
 #               Platform detection 
@@ -35,19 +34,28 @@ if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
 endif()
 
 # CPU ops
+# exposed to python as protax.ops.gpu_ops
 pybind11_add_module(                                              # wraps cmake's add_library()
-  cpu_ops      # exposed to python as protax.ops.gpu_ops
-  ${CMAKE_SOURCE_DIR}/lib/knn_cpu.cpp
+  cpu_ops
+  ${CMAKE_SOURCE_DIR}/lib/cpu_op_bind.cpp
+  ${CMAKE_SOURCE_DIR}/lib/cpu_knn.cpp
+  ${CMAKE_SOURCE_DIR}/lib/cpu_ops.h
+  ${CMAKE_SOURCE_DIR}/lib/pybind11_kernel_helpers.h
 )
-# add shared lib to site-packages
-install(TARGETS cpu_ops DESTINATION ${SKBUILD_PROJECT_NAME}/ops)
+install(TARGETS cpu_ops DESTINATION ${SKBUILD_PROJECT_NAME}/ops)  # add shared lib to site-packages
 
 # GPU ops
 if(CUDA_FOUND)
+  # exposed to python as protax.ops.gpu_ops
   pybind11_add_module(
-    gpu_ops    # exposed to python as protax.ops.gpu_ops
-    ${CMAKE_SOURCE_DIR}/lib/knn_kernels.cu
-    ${CMAKE_SOURCE_DIR}/lib/knn_dispatch.cpp
+    gpu_ops
+    ${CMAKE_SOURCE_DIR}/lib/gpu_op_bind.cpp
+    ${CMAKE_SOURCE_DIR}/lib/gpu_ops.h
+    ${CMAKE_SOURCE_DIR}/lib/gpu_dispatch.cu
+    ${CMAKE_SOURCE_DIR}/lib/knn_gpu.cuh
+    ${CMAKE_SOURCE_DIR}/lib/knn_gpu.cu
+    ${CMAKE_SOURCE_DIR}/lib/kernel_helpers.h
+    ${CMAKE_SOURCE_DIR}/lib/pybind11_kernel_helpers.h
   )
   install(TARGETS gpu_ops DESTINATION ${SKBUILD_PROJECT_NAME}/ops)
 else()

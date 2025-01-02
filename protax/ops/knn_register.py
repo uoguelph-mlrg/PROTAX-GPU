@@ -39,9 +39,8 @@ def default_layouts(*shapes):
 # =======================================================
 #                     Primitives
 # =======================================================
+# primitives exposed to user code
 
-
-# Expose primitive to user code
 def knn(indptr, indices, matdat, N):
     """
     Return row-wise k nearest neighbors for a sparse CSR matrix

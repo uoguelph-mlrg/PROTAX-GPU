@@ -8,6 +8,6 @@ except ImportError:
 from .knn_register import knn, knn_v2
 
 __all__ = [
-        "knn",
-        "knn_v2"
+    "knn",
+    "knn_v2"
 ]

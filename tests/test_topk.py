@@ -1,13 +1,17 @@
 import jax
 import jax.numpy as jnp
 from jax.experimental import sparse
-import time
 from protax.taxonomy import CSRWrapper
 import numpy as np
 from scipy.sparse import csr_matrix
 from protax.ops import knn
 
+import time
+import logging
+
 jax_key = jax.random.PRNGKey(0)
+
+# from pudb import set_trace as breakpoint
 
 # ========= Helper functions ==========
 def generate_random_csr_matrix(nrows, ncols, density):
@@ -71,19 +75,14 @@ def bench_knn():
 # ======================================
 #                Unit Tests
 # ======================================
-
-# # Function to check if CUDA is available
-
-def cuda_available():
-    return shutil.which("nvcc") is not None
-
 def test_topk_platforms():
     cpu_knn = jax.jit(knn, backend="cpu", static_argnums=(3,))
 
     N = N2S_SMALL.shape[0]
     cpu_res = cpu_knn(N2S_SMALL.indptr, N2S_SMALL.indices, N2S_SMALL.data, N).block_until_ready()
-
-    if(cuda_available()):
+    _gpu_devices = ''.join([str(d) for d in jax.devices(backend='gpu')])
+    
+    if("cuda" in _gpu_devices):
         gpu_knn = jax.jit(knn, backend="gpu", static_argnums=(3,))
         gpu_res = gpu_knn(N2S_SMALL.indptr, N2S_SMALL.indices, N2S_SMALL.data, N).block_until_ready()
         cpu_res = jax.device_put(cpu_res, jax.devices("gpu")[0])
@@ -94,7 +93,6 @@ def test_topk_platforms():
     
 
 def test_topk_small():
-
     N = N2S_SMALL.shape[0]
     start_time = time.time()
     res = knn(N2S_SMALL.indptr, N2S_SMALL.indices, N2S_SMALL.data, N).block_until_ready()

@@ -1,16 +1,18 @@
 // Includes the infrastructure needed to serialize
 // descriptors that are used with the "opaque" parameter of the GPU custom call.
-// we'll use this parameter to pass the size of our problem.
+// we use this parameter to pass the size of our problem.
 
-#ifndef _KNN_JAX_KERNEL_HELPERS_H_
-#define _KNN_JAX_KERNEL_HELPERS_H_
+#ifndef _KERNEL_HELPERS_H_
+#define _KERNEL_HELPERS_H_
 
 #include <cstdint>
 #include <stdexcept>
 #include <string>
 #include <type_traits>
 
-namespace knn {
+namespace xla_helpers{
+
+// --------------------------------------------------
 
 // https://en.cppreference.com/w/cpp/numeric/bit_cast
 template <class To, class From>
@@ -27,10 +29,14 @@ bit_cast(const From& src) noexcept {
   return dst;
 }
 
+// --------------------------------------------------
+
 template <typename T>
 std::string PackDescriptorAsString(const T& descriptor) {
   return std::string(bit_cast<const char*>(&descriptor), sizeof(T));
 }
+
+// --------------------------------------------------
 
 template <typename T>
 const T* UnpackDescriptor(const char* opaque, std::size_t opaque_len) {
@@ -40,6 +46,6 @@ const T* UnpackDescriptor(const char* opaque, std::size_t opaque_len) {
   return bit_cast<const T*>(opaque);
 }
 
-}  // namespace knn 
+}  // namespace xla_helpers
 
 #endif
